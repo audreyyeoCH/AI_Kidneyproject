@@ -19,10 +19,15 @@ length(virtppl.1w$v_GFR[virtppl.1w$v_GFR <= 90/1000])
 length(virtppl.1m$v_GFR[virtppl.1m$v_GFR <= 90/1000])
 
 # getting the verge of kidney failures
-virtppl.1h[virtppl.1d$v_GFR <= 90/1000,]
-virtppl.1d[virtppl.1d$v_GFR <= 90/1000,]
-virtppl.1w[virtppl.1w$v_GFR <= 90/1000,]
-virtppl.1m[virtppl.1m$v_GFR <= 90/1000,]
+h9 = virtppl.1h[virtppl.1h$v_GFR <= 90/1000,]
+d9 = virtppl.1d[virtppl.1d$v_GFR <= 90/1000,]
+w9 = virtppl.1w[virtppl.1w$v_GFR <= 90/1000,]
+m9 = virtppl.1m[virtppl.1m$v_GFR <= 90/1000,]
+
+h10 =virtppl.1h[virtppl.1h$v_GFR > 90/1000,]
+d10 = virtppl.1d[virtppl.1d$v_GFR > 90/1000,]
+w10 = virtppl.1w[virtppl.1w$v_GFR > 90/1000,]
+m10 =virtppl.1m[virtppl.1m$v_GFR > 90/1000,]
 
 # preview
 View(virtppl.1d[1:6,])
@@ -36,13 +41,15 @@ virtppl.1m$id = c(seq(1,nrow(virtppl.1h),1))
 #check
 summary(virtppl.1d$id)
 
+# ckd and non ckd population
+
 # sampling n out of data frame
 set.seed(1964) # Kamala Harris' Birthyear
 n = 1000
 sampleit = as.numeric(c(sample(1:nrow(virtppl.1h), n, replace = FALSE)))
 # randomly sample from virt population dataset, slow
 virtppl.1h0 = data.frame(
-  rbind(as.matrix(virtppl.1h[virtppl.1h$v_GFR > 90/1000,]$id == sampleit]), 
+  rbind( as.matrix(virtppl.1h[virtppl.1h[virtppl.1h$v_GFR > 90/1000,]]$id == sampleit,]), 
 as.matrix(virtppl.1h[virtppl.1h$v_GFR <= 90/1000,]) )
 
 virtppl.1d0 = virtppl.1d[virtppl.1d$id == sampleit | virtppl.1d$v_GFR <= 90/1000,]
