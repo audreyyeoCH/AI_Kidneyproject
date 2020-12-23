@@ -64,6 +64,7 @@ load("../df_longdf.Rda")
 \begin{itemize}
 \item GFR : Glomerular Filtration Rate L/min, measure of renal health and clinical criteria parameter for kidney disease
 \item MAP : arithmetic measure of systolic and diastolic blood pressure in mmHg, clinical parameter for cardiorenal function
+\item The Guyton model of fluid, electrolyte, and circulatory regulation is an extensive mathematical model of human circulatory physiology, capable of simulating a variety of experimental conditions, and contains a number of linked subsystems relating to circulation and its neuroendocrine control.
 \end{itemize}
 \end{frame}
 
@@ -72,10 +73,10 @@ load("../df_longdf.Rda")
 \centering
 \begin{itemize}
   \item Guyton's model of whole-body circulatory regulation model
-  \item virtual population’’ from which virtual individuals can be chosen, on the basis of exhibiting conditions similar to those of a real-world patient
+  \item A sample of individuals taken from a virtual population on the basis of exhibiting conditions similar to those of a real-world patient
   \item Guyton model for in silico exploration of pathophysiological states and treatment strategies for purpose of sensitivity study
-  \item 96 parameters {x1 . . . x96 } and 276 output variables {y1 . . . y276 }
-  \item The distribution of these 96 parameters was: 32 cardiac, 21 renal, 16 autoregulation, 16 hormonal, 11 local circulation, and 4 thirst-related.
+  \item 96 parameters and 276 output variables 
+  \item 32 cardiac, 21 renal, 16 autoregulation, 16 hormonal, 11 local circulation, and 4 thirst-related.
 \end{itemize}
 \end{frame}
 
@@ -88,7 +89,7 @@ load("../df_longdf.Rda")
  	\end{itemize}
 \end{frame}
 
-\begin{frame}
+\begin{frame}{Distribution of GFR with 90 L/min threshold}
 \footnotesize
 \centering
 <<edagfr, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=7, fig.height=5>>=
@@ -100,14 +101,14 @@ ggplot(df) +
              color="pink", linetype="dashed", size=1) +
   scale_fill_brewer(palette = "Dark2") +
   scale_color_brewer(palette = "Dark2") +
-  theme_gray()
+  theme_gray() + labs(x = "L/min")
 @
 \end{frame}
 
-\begin{frame}
+\begin{frame}{Distribution of MAP values with mean indicated}
 \footnotesize
 \centering
-<<edamap, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=3>>=
+<<edamap, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=7, fig.height=5>>=
 ggplot(df) +
   geom_histogram(alpha=0.6, binwidth = 2, aes(x = v_PA, colour = v_PA)) +
   geom_density(aes(x = v_PA), alpha=.2, fill="#FF6666") +
@@ -116,36 +117,34 @@ ggplot(df) +
              color="pink", linetype="dashed", size=1) +
   scale_fill_brewer(palette = "Dark2") +
   scale_color_brewer(palette = "Dark2") +
-  theme_gray()
+  theme_gray() + labs(x = "MAP mmHg")
 @
 \end{frame}
 
 \begin{frame}{GFR path}
 \footnotesize
 \centering
-<<dfpa, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=3>>=
-ggplot(df[400:10000,]) +
-  geom_path(aes(y = log(v_GFR0), x = as.numeric(time), group = , colour = as.factor(id))) +
-  theme(legend.position = "none") + labs(y = "log GFR L/min", main = "") + 
-  theme_gray()
+<<dfpa, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=4.5>>=
+ggplot(df[4000:10000,]) +
+  geom_path(aes(y = log(v_GFR0), x = as.numeric(time), group = , colour = as.factor(id))) + theme_gray() +
+  theme(legend.position = "none") + labs(y = "log GFR L/min", main = "", x= "time") 
 @
 \end{frame}
 
 \begin{frame}{MAP path}
 \footnotesize
 \centering
-<<dfmap, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=3>>=
-ggplot(df[400:10000,]) +
-  geom_path(aes(y = log(v_PA), x = time, group = , colour = as.factor(id))) +
-  theme(legend.position = "none") + labs(y = "log MAP mmHG", main = "") + 
-  theme_gray()
+<<dfmap, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=4.5>>=
+ggplot(df[4000:10000,]) +
+  geom_path(aes(y = log(v_PA), x = time, group = , colour = as.factor(id))) + theme_gray() +
+  theme(legend.position = "none") + labs(y = "log MAP mmHG", main = "", x = "time") 
 @
 \end{frame}
 
 \begin{frame}{Clustered Data in 2 partitions}
 \footnotesize
 \centering
-<<eda2, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=3>>=
+<<eda2, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=4>>=
 ggplot(df_longdf, aes(x = time, y = v_GFR0.y, colour = kmlclusters2, group = kmlclusters2)) +
   geom_smooth(method = "loess", se = TRUE) +
   theme_gray()+
@@ -164,7 +163,7 @@ ggplot(df_longdf, aes(x = time, y = v_GFR0.y, colour = kmlclusters2, group = kml
 \begin{frame}{Clustered Data in 4 partitions}
 \footnotesize
 \centering
-<<eda4, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=3>>=
+<<eda4, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=4>>=
 ggplot(df_longdf, aes(x = as.numeric(time), y = v_GFR0.y, colour = kmlclusters4, group = kmlclusters4)) +
   geom_smooth(method = "loess", se = TRUE) +
   theme_gray()+
@@ -186,6 +185,7 @@ ggplot(df_longdf, aes(x = as.numeric(time), y = v_GFR0.y, colour = kmlclusters4,
   \item Moss R, Grosse T, Marchant I, Lassau N, Gueyffier F, et al. (2012) Virtual Patients and Sensitivity Analysis of the Guyton Model of Blood Pressure Regulation: Towards Individualized Models of Whole-Body Physiology. PLoS Comput Biol 8(6): e1002571. doi:10.1371/journal.pcbi.1002571
   \item Kratzer, Pittavino, Lewis, Furrer, 2017 \texttt{abn}: An R Package for Modelling Multivariate Data Using Additive Bayesian Networks.
   \item Genolini, Alacoque, Sentenac, Arnaud, 2017 kml and kml3d: R Packages to Cluster Longitudinal Data \emph{kml and kml3d: R Packages to Cluster Longitudinal Data}
+  \item {https://models.physiomeproject.org/exposure/}
 \end{itemize}
 %  \bibliographystyle{apalike}
 %\bibliography{biblio}
