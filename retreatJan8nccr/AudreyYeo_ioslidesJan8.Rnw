@@ -1,0 +1,194 @@
+\documentclass{beamer}
+\begin{document}
+\title{Longitudinal cardiorenal data}
+\author{Audrey Yeo, Rn, M Nursing, MSci Biostatistics}
+\date{15 Jan 2021}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+<<include=FALSE,purl=FALSE>>=
+library(knitr)
+opts_chunk$set(
+fig.path="figures/ch01_fig.jpg", fig.show="hold", 
+	cache=FALSE, fig.height=4)
+
+@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
+<<data_loading, include=FALSE, error=FALSE, message=FALSE, warning=FALSE, eval = TRUE, echo = FALSE>>=
+## This section loads the relevant packages and dataset
+library(kml)
+library(readxl)
+library(tidyverse)
+library(ggmosaic)
+library(dplyr)
+library(lme4)
+library(janitor)
+library(ggplot2)
+library(corrplot)
+library(RColorBrewer)
+library(corrplot) # for correlation plots
+library(RColorBrewer)
+library(kableExtra)
+library(cowplot)
+load("../doi_10.5061_dryad.h3s0r__v1/df.RData")
+load("../df_longdf.Rda")
+# load("../Data/loss_long.Rda")
+# load("../Data/er_long.Rda")
+# load("../Data/er_long0.Rda")
+# load("../Data/op.Rda")
+# load("../Data/fp.Rda")
+# load("../Data/tp.Rda")
+# load("../Data/twentyp.Rda")
+# load("../Data/twokmlcounts.Rda")
+# load("../Data/fourkmlcounts.Rda")
+# load("../Data/tab_loss0.Rda")
+# load("../Figures/tab_loss.Rda")
+@
+
+\maketitle
+
+
+\begin{frame}{About longitudinal data, or observations in a time horizon}
+\footnotesize
+\centering
+  \begin{itemize}
+    \item Complete or incomplete in one trajectory
+    \item Difference to a cross-sectional study
+    \item Longitudinal study and evolution of variables
+    \item Dependant data
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Terminology}
+\footnotesize
+\centering
+\begin{itemize}
+\item GFR : Glomerular Filtration Rate L/min, measure of renal health and clinical criteria parameter for kidney disease
+\item MAP : arithmetic measure of systolic and diastolic blood pressure in mmHg, clinical parameter for cardiorenal function
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Method}
+\footnotesize
+\centering
+\begin{itemize}
+  \item Guyton's model of whole-body circulatory regulation model
+  \item virtual population’’ from which virtual individuals can be chosen, on the basis of exhibiting conditions similar to those of a real-world patient
+  \item Guyton model for in silico exploration of pathophysiological states and treatment strategies for purpose of sensitivity study
+  \item 96 parameters {x1 . . . x96 } and 276 output variables {y1 . . . y276 }
+  \item The distribution of these 96 parameters was: 32 cardiac, 21 renal, 16 autoregulation, 16 hormonal, 11 local circulation, and 4 thirst-related.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Time horizon for cardiorenal data}
+\footnotesize
+\centering
+\begin{itemize}
+  \item Time points are unequi-spaced
+	\item Four time points : 1h, 1d, 1e, 1 m
+ 	\end{itemize}
+\end{frame}
+
+\begin{frame}
+\footnotesize
+\centering
+<<edagfr, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=7, fig.height=5>>=
+ggplot(df) +
+  geom_histogram(alpha=0.6, binwidth = 2, aes(x = v_GFR0)) +
+  geom_density(aes(x = v_GFR0), alpha=.2, fill="#FF6666") +
+  theme(legend.position = "none") +
+  geom_vline(aes(xintercept= 90),
+             color="pink", linetype="dashed", size=1) +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_gray()
+@
+\end{frame}
+
+\begin{frame}
+\footnotesize
+\centering
+<<edamap, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=3>>=
+ggplot(df) +
+  geom_histogram(alpha=0.6, binwidth = 2, aes(x = v_PA, colour = v_PA)) +
+  geom_density(aes(x = v_PA), alpha=.2, fill="#FF6666") +
+  theme(legend.position = "none") +
+  geom_vline(aes(xintercept=mean(df$v_PA)),
+             color="pink", linetype="dashed", size=1) +
+  scale_fill_brewer(palette = "Dark2") +
+  scale_color_brewer(palette = "Dark2") +
+  theme_gray()
+@
+\end{frame}
+
+\begin{frame}{GFR path}
+\footnotesize
+\centering
+<<dfpa, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=3>>=
+ggplot(df[400:10000,]) +
+  geom_path(aes(y = log(v_GFR0), x = as.numeric(time), group = , colour = as.factor(id))) +
+  theme(legend.position = "none") + labs(y = "log GFR L/min", main = "") + 
+  theme_gray()
+@
+\end{frame}
+
+\begin{frame}{MAP path}
+\footnotesize
+\centering
+<<dfmap, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=3>>=
+ggplot(df[400:10000,]) +
+  geom_path(aes(y = log(v_PA), x = time, group = , colour = as.factor(id))) +
+  theme(legend.position = "none") + labs(y = "log MAP mmHG", main = "") + 
+  theme_gray()
+@
+\end{frame}
+
+\begin{frame}{Clustered Data in 2 partitions}
+\footnotesize
+\centering
+<<eda2, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=3>>=
+ggplot(df_longdf, aes(x = time, y = v_GFR0.y, colour = kmlclusters2, group = kmlclusters2)) +
+  geom_smooth(method = "loess", se = TRUE) +
+  theme_gray()+
+  labs(y = "GFR L/min", x = "time") +
+  #geom_vline(xintercept = c(6, ), colour = "red", linetype = "dotted") +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 8),
+        legend.text = element_text(size = 8),
+        axis.title = element_text(size = 8),
+        axis.text.x.bottom = element_text(size = 8)) + 
+        expand_limits(y=c(110, 120)) 
+@
+\end{frame}
+
+
+\begin{frame}{Clustered Data in 4 partitions}
+\footnotesize
+\centering
+<<eda4, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=3>>=
+ggplot(df_longdf, aes(x = as.numeric(time), y = v_GFR0.y, colour = kmlclusters4, group = kmlclusters4)) +
+  geom_smooth(method = "loess", se = TRUE) +
+  theme_gray()+
+  labs(y = "GFR L/min", x = "time") +
+  #geom_vline(xintercept = c(6, ), colour = "red", linetype = "dotted") +
+  theme(legend.position = "bottom",
+        legend.title = element_text(size = 8),
+        legend.text = element_text(size = 8),
+        axis.title = element_text(size = 8),
+        axis.text.x.bottom = element_text(size = 8)) + 
+        expand_limits(y=c(110, 120)) 
+@
+\end{frame}
+
+\begin{frame}{References}
+\footnotesize
+\begin{itemize}
+  \item Clemmer JS, Hester RL, Pruett WA. 2018 Simulating a virtual population’s sensitivity to salt and uninephrectomy. Interface Focus 8: 20160134. http://dx.doi.org/10.1098/rsfs.2016.0134
+  \item Moss R, Grosse T, Marchant I, Lassau N, Gueyffier F, et al. (2012) Virtual Patients and Sensitivity Analysis of the Guyton Model of Blood Pressure Regulation: Towards Individualized Models of Whole-Body Physiology. PLoS Comput Biol 8(6): e1002571. doi:10.1371/journal.pcbi.1002571
+  \item Kratzer, Pittavino, Lewis, Furrer, 2017 \texttt{abn}: An R Package for Modelling Multivariate Data Using Additive Bayesian Networks.
+  \item Genolini, Alacoque, Sentenac, Arnaud, 2017 kml and kml3d: R Packages to Cluster Longitudinal Data \emph{kml and kml3d: R Packages to Cluster Longitudinal Data}
+\end{itemize}
+%  \bibliographystyle{apalike}
+%\bibliography{biblio}
+\end{frame}
+
+\end{document}
