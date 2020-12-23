@@ -78,10 +78,15 @@ df = data.frame(rbind(as.matrix(virtppl.1h0), as.matrix(virtppl.1d0), as.matrix(
 df$v_GFR0 <- df$v_GFR*1000
 save(df, file = "doi_10.5061_dryad.h3s0r__v1/df.RData")
 
+load("doi_10.5061_dryad.h3s0r__v1/df.RData")
 # first longitudinal plot
 ggplot(df) +
   geom_path(aes(y = log(v_PA), x = time, group = , colour = as.factor(id))) +
-  theme(legend.position = "none")
+  theme(legend.position = "none") + labs(y = "log MAP mmHG") 
+
+ggplot(df) + # shows missing values
+  geom_path(aes(y = log(v_GFR0), x = time, group = , colour = as.factor(id))) +
+  theme(legend.position = "none") + labs(y = "log GFR L/min") 
 
 ggplot(df) +
   geom_path(aes(y = v_GFR0, x = time, group = , colour = as.factor(id))) +
@@ -268,13 +273,15 @@ ggplot(df_longdf, aes(x = time, y = v_PA, colour = kmlclusters4, group = kmlclus
 
 
 df_longdf %>% 
-  tabyl(kmlclusters2, time)
+  tabyl(kmlclusters2, time) -> kml2tab
 
 df_longdf %>% 
-  tabyl(kmlclusters4, time)
+  tabyl(kmlclusters4, time) -> kml4tab
 
-df_longdf %>% 
-  tabyl(kmlclusters4, kmlclusters2)
+aggregate(kml2tab, kml4tab)
+
+df_longdf %>%  # concordance
+  tabyl(kmlclusters2, kmlclusters4)
 
 df_longdf %>%
   ggplot(aes(x = time, y = v_PA, group = time)) +
