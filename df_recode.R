@@ -13,10 +13,11 @@ load("doi_10.5061_dryad.h3s0r__v1/virtppl.1m.RData")
 #load("doi_10.5061_dryad.h3s0r__v1/virtppl.ee.RData") # elementary effects
 
 # all stars of "folklore" by taylor swift
-betty = length(virtppl.1h$v_GFR[virtppl.1h$v_GFR <= 90/1000]) # in the 384'000 observations, there are 2'834 observations with GFR below 90mL/min
-ines = length(virtppl.1d$v_GFR[virtppl.1d$v_GFR <= 90/1000])
-james = length(virtppl.1w$v_GFR[virtppl.1w$v_GFR <= 90/1000])
-august = length(virtppl.1m$v_GFR[virtppl.1m$v_GFR <= 90/1000])
+betty = length(virtppl.1h$v_GFR[virtppl.1h$v_GFR <= 90/1000]) # 2834
+# in the 384'000 observations, there are 2'834 observations with GFR below 90mL/min
+ines = length(virtppl.1d$v_GFR[virtppl.1d$v_GFR <= 90/1000]) # 2771
+james = length(virtppl.1w$v_GFR[virtppl.1w$v_GFR <= 90/1000]) # 2765
+august = length(virtppl.1m$v_GFR[virtppl.1m$v_GFR <= 90/1000]) #2781
 
 # getting the verge of kidney failures
 # h9 = virtppl.1h[virtppl.1h$v_GFR <= 90/1000,]
@@ -30,8 +31,8 @@ august = length(virtppl.1m$v_GFR[virtppl.1m$v_GFR <= 90/1000])
 # m10 =virtppl.1m[virtppl.1m$v_GFR > 90/1000,]
 
 # preview
-View(virtppl.1d[1:6,])
-View(virtppl.1h[1:6,])
+# View(virtppl.1d[1:6,])
+# View(virtppl.1h[1:6,])
 
 # assign ID
 virtppl.1h$id = c(seq(1,nrow(virtppl.1h),1))
@@ -70,7 +71,7 @@ high_1m = virtppl.1h[virtppl.1m$group == "norm GFR",]
 # save(low_1d, file = "doi_10.5061_dryad.h3s0r__v1/low_1d.RData")
 # save(low_1w, file = "doi_10.5061_dryad.h3s0r__v1/low_1w.RData")
 # save(low_1m, file = "doi_10.5061_dryad.h3s0r__v1/low_1m.RData")
-
+# 
 # save(high_1h, file = "doi_10.5061_dryad.h3s0r__v1/high_1h.RData")
 # save(high_1d, file = "doi_10.5061_dryad.h3s0r__v1/high_1d.RData")
 # save(high_1w, file = "doi_10.5061_dryad.h3s0r__v1/high_1w.RData")
@@ -98,11 +99,12 @@ high_1d0 = high_1h[high_1d$id %in% sampleit,]
 high_1w0 = high_1h[high_1w$id %in% sampleit,]
 high_1m0 = high_1h[high_1m$id %in% sampleit,]
 
+
 # save
-# save(high_1h0, file = "doi_10.5061_dryad.h3s0r__v1/high_1h0.RData")
-# save(high_1d0,file = "doi_10.5061_dryad.h3s0r__v1/high_1d0.RData")
-# save(high_1w0, file = "doi_10.5061_dryad.h3s0r__v1/high_1w0.RData")
-# save(high_1m0, file = "doi_10.5061_dryad.h3s0r__v1/high_1m0.RData")
+save(high_1h0, file = "doi_10.5061_dryad.h3s0r__v1/high_1h0.RData")
+save(high_1d0,file = "doi_10.5061_dryad.h3s0r__v1/high_1d0.RData")
+save(high_1w0, file = "doi_10.5061_dryad.h3s0r__v1/high_1w0.RData")
+save(high_1m0, file = "doi_10.5061_dryad.h3s0r__v1/high_1m0.RData")
 
 #load
 load(file = "doi_10.5061_dryad.h3s0r__v1/high_1h0.RData")
@@ -118,10 +120,16 @@ df$v_GFR0 <- df$v_GFR*1000
 #df$time <- as.factor(df$time)
 
 # save
-#save(df, file = "doi_10.5061_dryad.h3s0r__v1/df.RData")
+save(df, file = "doi_10.5061_dryad.h3s0r__v1/df.RData")
 # load
 load("doi_10.5061_dryad.h3s0r__v1/df.RData")
 
+sampleit0 = as.numeric(c(sample(1:nrow(df), n*0.50, replace = FALSE)))
+df$id = as.numeric(df$id)
+df0 = df[ df$id %in% sampleit0,]
+class(sampleit0)
+class(df$id)
+save(df0, file = "doi_10.5061_dryad.h3s0r__v1/df0.RData")
 #summary tables
 # tab.n = array(NA, dim=c(4,3))
 # tab.n[,1] = levels(df$time)
@@ -134,11 +142,11 @@ load("doi_10.5061_dryad.h3s0r__v1/df.RData")
 summary(df)
 
 # first longitudinal plot
-ggplot(df) +
+ggplot(df0) +
   geom_path(aes(y = v_PA, x = time, group = , colour = as.factor(id))) +
   theme(legend.position = "none") + labs(y = "log MAP mmHG") 
 
-ggplot(df) + # shows missing values
+ggplot(df0) + # shows missing values
   geom_path(aes(y = log(v_GFR0), x = time, group = , colour = as.factor(id))) +
   theme(legend.position = "none") + labs(y = "log GFR L/min") 
 
@@ -174,10 +182,9 @@ ggplot(df) +
 
 
 ######## Cld object needed for kml #####
-shortdf <- df[, c(413, 414, 415)]
+shortdf <- df[, c(413, 415, 416)]
 str(shortdf)
-spread(shortdf, time, v_GFR0) -> widedf0
-#spread(df, mmyy, meanPDheel) -> testwide
+spread(shortdf, id, time, v_GFR0) -> widedf0
 head(widedf0)
 sum(is.na(widedf0)) # 6461 missing values of (11159 x 415)
 #class(widedf0)
