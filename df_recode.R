@@ -7,12 +7,12 @@ library(janitor)
 
 # load virt pop data
 # 384'000 rows x 412 variables, wide form, each row is an individual 
-# load("doi_10.5061_dryad.h3s0r__v1/virtppl.1h.RData")
-# load("doi_10.5061_dryad.h3s0r__v1/virtppl.1d.RData")
-# load("doi_10.5061_dryad.h3s0r__v1/virtppl.1w.RData")
-# load("doi_10.5061_dryad.h3s0r__v1/virtppl.1m.RData")
-# load("doi_10.5061_dryad.h3s0r__v1/virtppl.ee.RData") # elementary effects
-# length(virtppl.1h$v_GFR[virtppl.1h$v_GFR < 90/1000]) # in the 384'000 observations, there are 2'834 observations with GFR below 90mL/min
+load("doi_10.5061_dryad.h3s0r__v1/virtppl.1h.RData")
+load("doi_10.5061_dryad.h3s0r__v1/virtppl.1d.RData")
+load("doi_10.5061_dryad.h3s0r__v1/virtppl.1w.RData")
+load("doi_10.5061_dryad.h3s0r__v1/virtppl.1m.RData")
+load("doi_10.5061_dryad.h3s0r__v1/virtppl.ee.RData") # elementary effects
+length(virtppl.1h$v_GFR[virtppl.1h$v_GFR < 90/1000]) # in the 384'000 observations, there are 2'834 observations with GFR below 90mL/min
 
 length(virtppl.1d$v_GFR[virtppl.1d$v_GFR <= 90/1000])
 length(virtppl.1w$v_GFR[virtppl.1w$v_GFR <= 90/1000])
@@ -71,14 +71,45 @@ save(virtppl.1h0, file = "doi_10.5061_dryad.h3s0r__v1/virtppl.1h0a.RData")
 save(virtppl.1d0, file = "doi_10.5061_dryad.h3s0r__v1/virtppl.1d0a.RData")
 save(virtppl.1w0, file = "doi_10.5061_dryad.h3s0r__v1/virtppl.1w0a.RData")
 save(virtppl.1m0, file = "doi_10.5061_dryad.h3s0r__v1/virtppl.1m0a.RData")
+# Loading
+load(file = "doi_10.5061_dryad.h3s0r__v1/virtppl.1h0a.RData")
+load(file = "doi_10.5061_dryad.h3s0r__v1/virtppl.1d0a.RData")
+load(file = "doi_10.5061_dryad.h3s0r__v1/virtppl.1w0a.RData")
+load(file = "doi_10.5061_dryad.h3s0r__v1/virtppl.1m0a.RData")
 
 # aggregate 0 data
 df = data.frame(rbind(as.matrix(virtppl.1h0), as.matrix(virtppl.1d0), as.matrix(virtppl.1w0), as.matrix(virtppl.1m0)))
 # recode_GFR, conversion from L/min to mL/min
 df$v_GFR0 <- df$v_GFR*1000
-save(df, file = "doi_10.5061_dryad.h3s0r__v1/df.RData")
+df$time <- as.factor(df$time)
+df$group <- NA
+length(df$group)
 
+df$group <- c(df$group[df$v_GFR0 <= 90] == "low GFR", df$group[df$v_GFR0 <= 90] == "low GFR"))
+
+save(df, file = "doi_10.5061_dryad.h3s0r__v1/df.RData")
 load("doi_10.5061_dryad.h3s0r__v1/df.RData")
+
+
+# summary tables
+tab.n = array(NA, dim=c(4,3))
+tab.n[,1:3] = c("", "low GFR", "norm GFR")
+tab.dv[1:4,1] = levels(df$time)
+tab.dv[,3] = tapply(longdata$dev, longdata$TAS_group, 
+                    function (x) sprintf("%0.2f (%0.2f)", mean(x), sd(x)))
+colnames(tab.dv) = c("group", "n", "mean (SD)")
+print(tab.dv)
+
+tab.n = array(NA, dim=c(4,3))
+tab.n[,1] = levels(df$time)
+tab.n[,2] = summary(df$time)
+tab.n[,3] = tapply(longdata$dev, longdata$TAS_group, 
+                    function (x) sprintf("%0.2f (%0.2f)", mean(x), sd(x)))
+colnames(tab.n) = c("time point", "low GFR", "high GFR")
+print(tab.dv)
+
+summary(df)
+
 # first longitudinal plot
 ggplot(df) +
   geom_path(aes(y = log(v_PA), x = time, group = , colour = as.factor(id))) +
