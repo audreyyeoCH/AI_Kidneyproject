@@ -3,6 +3,7 @@ library(tidyverse)
 library(viridis)
 library(ggmosaic)
 library(janitor)
+library(kml)
 
 # load virt pop data
 # 384'000 rows x 412 variables, wide form, each row is an individual 
@@ -34,11 +35,26 @@ august = length(virtppl.1m$v_GFR[virtppl.1m$v_GFR <= 90/1000]) #2781
 # View(virtppl.1d[1:6,])
 # View(virtppl.1h[1:6,])
 
+
 # assign ID
 virtppl.1h$id = c(seq(1,nrow(virtppl.1h),1))
 virtppl.1d$id = c(seq(1,nrow(virtppl.1h),1))
 virtppl.1w$id = c(seq(1,nrow(virtppl.1h),1))
 virtppl.1m$id = c(seq(1,nrow(virtppl.1h),1))
+#check
+summary(virtppl.1d$id)
+
+# sampling n out of data frame
+set.seed(1964) # Kamala Harris' Birthyear
+n = 2500
+sampleit = as.numeric(c(sample(1:nrow(virtppl.1h), n, replace = FALSE)))
+# randomly sample from virt population dataset, slow
+virtppl.1h0 = virtppl.1h[virtppl.1h[virtppl.1h$v_GFR>90,]$id == sampleit | virtppl.1h$v_GFR <= 90/1000,]
+virtppl.1d0 = virtppl.1d[virtppl.1d$id == sampleit | virtppl.1d$v_GFR <= 90/1000,]
+virtppl.1w0 = virtppl.1w[virtppl.1w$id == sampleit | virtppl.1w$v_GFR <= 90/1000,]
+virtppl.1m0 = virtppl.1m[virtppl.1m$id == sampleit | virtppl.1m$v_GFR <= 90/1000,]
+
+# ########
 
 #assign GRP group
 virtppl.1h$group = ifelse(virtppl.1h$v_GFR <= 90/1000 , "low GFR", "norm GFR")
@@ -59,34 +75,12 @@ summary(virtppl.1d$id)
 low_1h = virtppl.1h[virtppl.1h$group == "low GFR",]
 low_1d = virtppl.1h[virtppl.1d$group == "low GFR",]
 low_1w = virtppl.1h[virtppl.1w$group == "low GFR",]
-low_1m = virtppl.1h[virtppl.1m$group == "low GFR",]
+low_1m =virtppl.1h[virtppl.1m$group == "low GFR",]
 
-high_1h = virtppl.1h[virtppl.1h$group == "norm GFR",]
-high_1d = virtppl.1h[virtppl.1d$group == "norm GFR",]
-high_1w = virtppl.1h[virtppl.1w$group == "norm GFR",]
-high_1m = virtppl.1h[virtppl.1m$group == "norm GFR",]
-
-# saving
-# save(low_1h, file = "doi_10.5061_dryad.h3s0r__v1/low_1h.RData")
-# save(low_1d, file = "doi_10.5061_dryad.h3s0r__v1/low_1d.RData")
-# save(low_1w, file = "doi_10.5061_dryad.h3s0r__v1/low_1w.RData")
-# save(low_1m, file = "doi_10.5061_dryad.h3s0r__v1/low_1m.RData")
-# 
-# save(high_1h, file = "doi_10.5061_dryad.h3s0r__v1/high_1h.RData")
-# save(high_1d, file = "doi_10.5061_dryad.h3s0r__v1/high_1d.RData")
-# save(high_1w, file = "doi_10.5061_dryad.h3s0r__v1/high_1w.RData")
-# save(high_1m, file = "doi_10.5061_dryad.h3s0r__v1/high_1m.RData")
-
-# Load
-load(file = "doi_10.5061_dryad.h3s0r__v1/low_1h.RData")
-load(file = "doi_10.5061_dryad.h3s0r__v1/low_1d.RData")
-load(file = "doi_10.5061_dryad.h3s0r__v1/low_1w.RData")
-load(file = "doi_10.5061_dryad.h3s0r__v1/low_1m.RData")
-
-load(file = "doi_10.5061_dryad.h3s0r__v1/high_1h.RData")
-load(file = "doi_10.5061_dryad.h3s0r__v1/high_1d.RData")
-load(file = "doi_10.5061_dryad.h3s0r__v1/high_1w.RData")
-load(file = "doi_10.5061_dryad.h3s0r__v1/high_1m.RData")
+high_1h0 = virtppl.1h[virtppl.1h$group == "norm GFR",]
+high_1d0 = virtppl.1h[virtppl.1d$group == "norm GFR",]
+high_1w0 = virtppl.1h[virtppl.1w$group == "norm GFR",]
+high_1m0 = virtppl.1h[virtppl.1m$group == "norm GFR",]
 
 # sampling n out of data frame
 set.seed(1964) # Kamala Harris' Birthyear
@@ -94,11 +88,21 @@ n = mean(betty, ines, james, august)
 sampleit = as.numeric(c(sample(1:nrow(virtppl.1h), n, replace = FALSE)))
 
 # subset the sampleit data
-high_1h0 = high_1h[high_1h$id %in% sampleit,]
-high_1d0 = high_1h[high_1d$id %in% sampleit,]
-high_1w0 = high_1h[high_1w$id %in% sampleit,]
-high_1m0 = high_1h[high_1m$id %in% sampleit,]
+high_1h = high_1h0[high_1h0$id %in% sampleit,]
+high_1d = high_1d0[high_1d0$id %in% sampleit,]
+high_1w = high_1w0[high_1w0$id %in% sampleit,]
+high_1m = high_1m0[high_1m0$id %in% sampleit,]
 
+# saving
+save(low_1h, file = "doi_10.5061_dryad.h3s0r__v1/low_1h.RData")
+save(low_1d, file = "doi_10.5061_dryad.h3s0r__v1/low_1d.RData")
+save(low_1w, file = "doi_10.5061_dryad.h3s0r__v1/low_1w.RData")
+save(low_1m, file = "doi_10.5061_dryad.h3s0r__v1/low_1m.RData")
+
+save(high_1h, file = "doi_10.5061_dryad.h3s0r__v1/high_1h.RData")
+save(high_1d, file = "doi_10.5061_dryad.h3s0r__v1/high_1d.RData")
+save(high_1w, file = "doi_10.5061_dryad.h3s0r__v1/high_1w.RData")
+save(high_1m, file = "doi_10.5061_dryad.h3s0r__v1/high_1m.RData")
 
 # save
 save(high_1h0, file = "doi_10.5061_dryad.h3s0r__v1/high_1h0.RData")
@@ -112,24 +116,51 @@ load(file = "doi_10.5061_dryad.h3s0r__v1/high_1d0.RData")
 load(file = "doi_10.5061_dryad.h3s0r__v1/high_1w0.RData")
 load(file = "doi_10.5061_dryad.h3s0r__v1/high_1m0.RData")
 
+# Load
+load(file = "doi_10.5061_dryad.h3s0r__v1/low_1h.RData")
+load(file = "doi_10.5061_dryad.h3s0r__v1/low_1d.RData")
+load(file = "doi_10.5061_dryad.h3s0r__v1/low_1w.RData")
+load(file = "doi_10.5061_dryad.h3s0r__v1/low_1m.RData")
+
+load(file = "doi_10.5061_dryad.h3s0r__v1/high_1h.RData")
+load(file = "doi_10.5061_dryad.h3s0r__v1/high_1d.RData")
+load(file = "doi_10.5061_dryad.h3s0r__v1/high_1w.RData")
+load(file = "doi_10.5061_dryad.h3s0r__v1/high_1m.RData")
+
+hey = rbind(low_1h, high_1h)
+hey2 = rbind(low_1d, high_1d)
+hey3 = rbind(low_1w, high_1w)
+hey4 = rbind(low_1m, high_1m)
+
+#hey5 = data.frame(as.matrix(hey), as.matrix(hey2))
+
+huh = data.frame(rbind(as.matrix(hey), as.matrix(hey2)))
+huh2 = data.frame(rbind(as.matrix(huh), as.matrix(hey3)))
+huh3 = data.frame(rbind(as.matrix(huh2), as.matrix(hey4)))
+
+ #df = data.frame(as.matrix(hey), as.matrix(hey2), 
+                        # as.matrix(hey3), as.matrix(hey4))
+
 # aggregate to df
-df = data.frame(rbind(as.matrix(high_1d0), as.matrix(high_1h0), as.matrix(high_1w0), as.matrix(high_1m0), as.matrix(low_1h),as.matrix(low_1d),as.matrix(low_1w),as.matrix(low_1m)))
+#df = data.frame(rbind(as.matrix(high_1d0), as.matrix(high_1h0), as.matrix(high_1w0), as.matrix(high_1m0), as.matrix(low_1h),as.matrix(low_1d),as.matrix(low_1w),as.matrix(low_1m)), .id = NULL)
 # recode_GFR, conversion from L/min to mL/min
-df$v_GFR = as.numeric(df$v_GFR)
-df$v_GFR0 <- df$v_GFR*1000
+huh3$v_PA = as.numeric(as.character(huh3$v_PA))
+huh3$v_GFR = as.numeric(as.character(huh3$v_GFR))
+huh3$v_GFR0 <- huh3$v_GFR*1000
+#df$v_PA <- as.numeric(df$v_PA)
 #df$time <- as.factor(df$time)
 
 # save
-save(df, file = "doi_10.5061_dryad.h3s0r__v1/df.RData")
+save(huh3, file = "doi_10.5061_dryad.h3s0r__v1/df.RData")
 # load
 load("doi_10.5061_dryad.h3s0r__v1/df.RData")
 
-sampleit0 = as.numeric(c(sample(1:nrow(df), n*0.50, replace = FALSE)))
-df$id = as.numeric(df$id)
-df0 = df[ df$id %in% sampleit0,]
-class(sampleit0)
-class(df$id)
-save(df0, file = "doi_10.5061_dryad.h3s0r__v1/df0.RData")
+# sampleit0 = as.numeric(c(sample(1:22386, 2000, replace = FALSE)))
+# df$id = as.numeric(df$id)
+# df0 = df[ df$id %in% sampleit0,]
+# class(sampleit0)
+# class(df$id)
+# save(df0, file = "doi_10.5061_dryad.h3s0r__v1/df0.RData")
 #summary tables
 # tab.n = array(NA, dim=c(4,3))
 # tab.n[,1] = levels(df$time)
@@ -139,14 +170,27 @@ save(df0, file = "doi_10.5061_dryad.h3s0r__v1/df0.RData")
 # colnames(tab.n) = c("time point", "low GFR", "high GFR")
 # print(tab.dv)
 
-summary(df)
+
+#EDA
+summary(df$v_PA)
+
+ggplot(df) +
+  geom_histogram(alpha = 0.6, binwidth= 2, aes(x = v_PA)) +
+  geom_vline(aes(xintercept= 106.6), color="pink", 
+             linetype="dashed", size=1)
+
+ggplot(df) +
+  geom_histogram(alpha=0.6, binwidth = 20, 
+                 aes(x = v_GFR0, colour = v_GFR0)) +
+  geom_vline(aes(xintercept= 90), color="pink", 
+             linetype="dashed", size=1)
 
 # first longitudinal plot
-ggplot(df0) +
+ggplot(df) +
   geom_path(aes(y = v_PA, x = time, group = , colour = as.factor(id))) +
   theme(legend.position = "none") + labs(y = "log MAP mmHG") 
 
-ggplot(df0) + # shows missing values
+ggplot(df) + # shows missing values
   geom_path(aes(y = log(v_GFR0), x = time, group = , colour = as.factor(id))) +
   theme(legend.position = "none") + labs(y = "log GFR L/min") 
 
