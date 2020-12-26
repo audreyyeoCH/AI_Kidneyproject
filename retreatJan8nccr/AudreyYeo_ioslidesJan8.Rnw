@@ -96,7 +96,7 @@ n = (2*(u+v)^2)/denom
 \centering
 \begin{itemize}
   \item Time points are unequi-spaced
-	\item Four time points : 1h, 1d, 1e, 1 m
+	\item Four time points : 1h, 1d, 1w, 1 m
  	\end{itemize}
 \end{frame}
 
@@ -105,7 +105,7 @@ n = (2*(u+v)^2)/denom
 \centering
 <<edagfr, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=7, fig.height=5>>=
 ggplot(df) +
-  geom_histogram(alpha=0.6, binwidth = 20, aes(x = v_GFR0)) +
+  geom_histogram(alpha=0.6, binwidth = 5, aes(x = v_GFR0)) +
   theme(legend.position = "none") +
   geom_vline(aes(xintercept= 90),
              color="pink", linetype="dashed", size=1) +
@@ -118,7 +118,7 @@ ggplot(df) +
 \centering
 <<edamap, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=7, fig.height=5>>=
 ggplot(df) +
-  geom_histogram(alpha=0.6, binwidth = 2, aes(x = v_PA, colour = v_PA)) +
+  geom_histogram(alpha=0.6, binwidth = 5, aes(x = v_PA, colour = v_PA)) +
   geom_density(aes(x = v_PA), alpha=.2, fill="#FF6666") +
   theme(legend.position = "none") +
   geom_vline(aes(xintercept=mean(df$v_PA)),
@@ -133,9 +133,10 @@ ggplot(df) +
 \footnotesize
 \centering
 <<dfpa, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=4.5>>=
-ggplot(df[4000:10000,]) +
-  geom_path(aes(y = log(v_GFR0), x = as.factor(time), group = , colour = as.factor(id))) + theme_gray() +
-  theme(legend.position = "none") + labs(y = "log GFR L/min", main = "", x= "time") 
+ggplot(df[9000:20000,]) +
+  geom_path(aes(y = v_GFR0, x = as.numeric(time), group = as.factor(id), colour = as.factor(id))) + 
+  theme_gray() +
+  theme(legend.position = "none") + labs(y = "GFR L/min", main = "", x= "time") 
 @
 \end{frame}
 
@@ -143,8 +144,8 @@ ggplot(df[4000:10000,]) +
 \footnotesize
 \centering
 <<dfmap, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=4.5>>=
-ggplot(df[4000:10000,]) +
-  geom_path(aes(y = log(v_PA), x = as.factor(time), group = , colour = as.factor(id))) + theme_gray() +
+ggplot(df[9000:20000,]) +
+  geom_path(aes(y = log(v_PA), x = as.numeric(time), group = as.factor(id), colour = as.factor(id))) + theme_gray() +
   theme(legend.position = "none") + labs(y = "log MAP mmHG", main = "", x = "time") 
 @
 \end{frame}
