@@ -48,13 +48,6 @@ summary(virtppl.1d$id)
 set.seed(1964) # Kamala Harris' Birthyear
 n = 2500
 sampleit = as.numeric(c(sample(1:nrow(virtppl.1h), n, replace = FALSE)))
-# randomly sample from virt population dataset, slow
-virtppl.1h0 = virtppl.1h[virtppl.1h[virtppl.1h$v_GFR>90,]$id == sampleit | virtppl.1h$v_GFR <= 90/1000,]
-virtppl.1d0 = virtppl.1d[virtppl.1d$id == sampleit | virtppl.1d$v_GFR <= 90/1000,]
-virtppl.1w0 = virtppl.1w[virtppl.1w$id == sampleit | virtppl.1w$v_GFR <= 90/1000,]
-virtppl.1m0 = virtppl.1m[virtppl.1m$id == sampleit | virtppl.1m$v_GFR <= 90/1000,]
-
-# ########
 
 #assign GRP group
 virtppl.1h$group = ifelse(virtppl.1h$v_GFR <= 90/1000 , "low GFR", "norm GFR")
@@ -64,46 +57,29 @@ virtppl.1m$group = ifelse(virtppl.1m$v_GFR <= 90/1000 , "low GFR", "norm GFR")
 
 # assign Time var
 virtppl.1h$time = data.frame(rep(1, nrow(virtppl.1h)))
-virtppl.1d$time = data.frame(rep(2, nrow(virtppl.1d)))
-virtppl.1w$time = data.frame(rep(3, nrow(virtppl.1w)))
-virtppl.1m$time = data.frame(rep(4, nrow(virtppl.1m)))
+virtppl.1d$time = data.frame(rep("2", nrow(virtppl.1d)))
+virtppl.1w$time = data.frame(rep("3", nrow(virtppl.1w)))
+virtppl.1m$time = data.frame(rep("4", nrow(virtppl.1m)))
 
 #check
 summary(virtppl.1d$id)
 
 # ckd and non ckd population
 low_1h = virtppl.1h[virtppl.1h$group == "low GFR",]
-low_1d = virtppl.1h[virtppl.1d$group == "low GFR",]
-low_1w = virtppl.1h[virtppl.1w$group == "low GFR",]
-low_1m =virtppl.1h[virtppl.1m$group == "low GFR",]
+low_1d = virtppl.1d[virtppl.1d$group == "low GFR",]
+low_1w = virtppl.1w[virtppl.1w$group == "low GFR",]
+low_1m =virtppl.1m[virtppl.1m$group == "low GFR",]
 
 high_1h0 = virtppl.1h[virtppl.1h$group == "norm GFR",]
-high_1d0 = virtppl.1h[virtppl.1d$group == "norm GFR",]
-high_1w0 = virtppl.1h[virtppl.1w$group == "norm GFR",]
-high_1m0 = virtppl.1h[virtppl.1m$group == "norm GFR",]
-
-# sampling n out of data frame
-set.seed(1964) # Kamala Harris' Birthyear
-n = mean(betty, ines, james, august)
-sampleit = as.numeric(c(sample(1:nrow(virtppl.1h), n, replace = FALSE)))
-
-# subset the sampleit data
-high_1h = high_1h0[high_1h0$id %in% sampleit,]
-high_1d = high_1d0[high_1d0$id %in% sampleit,]
-high_1w = high_1w0[high_1w0$id %in% sampleit,]
-high_1m = high_1m0[high_1m0$id %in% sampleit,]
+high_1d0 = virtppl.1d[virtppl.1d$group == "norm GFR",]
+high_1w0 = virtppl.1w[virtppl.1w$group == "norm GFR",]
+high_1m0 = virtppl.1m[virtppl.1m$group == "norm GFR",]
 
 # saving
 save(low_1h, file = "doi_10.5061_dryad.h3s0r__v1/low_1h.RData")
 save(low_1d, file = "doi_10.5061_dryad.h3s0r__v1/low_1d.RData")
 save(low_1w, file = "doi_10.5061_dryad.h3s0r__v1/low_1w.RData")
 save(low_1m, file = "doi_10.5061_dryad.h3s0r__v1/low_1m.RData")
-
-save(high_1h, file = "doi_10.5061_dryad.h3s0r__v1/high_1h.RData")
-save(high_1d, file = "doi_10.5061_dryad.h3s0r__v1/high_1d.RData")
-save(high_1w, file = "doi_10.5061_dryad.h3s0r__v1/high_1w.RData")
-save(high_1m, file = "doi_10.5061_dryad.h3s0r__v1/high_1m.RData")
-
 # save
 save(high_1h0, file = "doi_10.5061_dryad.h3s0r__v1/high_1h0.RData")
 save(high_1d0,file = "doi_10.5061_dryad.h3s0r__v1/high_1d0.RData")
@@ -115,6 +91,17 @@ load(file = "doi_10.5061_dryad.h3s0r__v1/high_1h0.RData")
 load(file = "doi_10.5061_dryad.h3s0r__v1/high_1d0.RData")
 load(file = "doi_10.5061_dryad.h3s0r__v1/high_1w0.RData")
 load(file = "doi_10.5061_dryad.h3s0r__v1/high_1m0.RData")
+
+# subset the sampleit data
+high_1h = high_1h0[high_1h0$id %in% sampleit,]
+high_1d = high_1d0[high_1d0$id %in% sampleit,]
+high_1w = high_1w0[high_1w0$id %in% sampleit,]
+high_1m = high_1m0[high_1m0$id %in% sampleit,]
+
+save(high_1h, file = "doi_10.5061_dryad.h3s0r__v1/high_1h.RData")
+save(high_1d, file = "doi_10.5061_dryad.h3s0r__v1/high_1d.RData")
+save(high_1w, file = "doi_10.5061_dryad.h3s0r__v1/high_1w.RData")
+save(high_1m, file = "doi_10.5061_dryad.h3s0r__v1/high_1m.RData")
 
 # Load
 load(file = "doi_10.5061_dryad.h3s0r__v1/low_1h.RData")
@@ -136,7 +123,7 @@ hey4 = rbind(low_1m, high_1m)
 
 huh = data.frame(rbind(as.matrix(hey), as.matrix(hey2)))
 huh2 = data.frame(rbind(as.matrix(huh), as.matrix(hey3)))
-huh3 = data.frame(rbind(as.matrix(huh2), as.matrix(hey4)))
+df = data.frame(rbind(as.matrix(huh2), as.matrix(hey4)))
 
  #df = data.frame(as.matrix(hey), as.matrix(hey2), 
                         # as.matrix(hey3), as.matrix(hey4))
@@ -144,14 +131,15 @@ huh3 = data.frame(rbind(as.matrix(huh2), as.matrix(hey4)))
 # aggregate to df
 #df = data.frame(rbind(as.matrix(high_1d0), as.matrix(high_1h0), as.matrix(high_1w0), as.matrix(high_1m0), as.matrix(low_1h),as.matrix(low_1d),as.matrix(low_1w),as.matrix(low_1m)), .id = NULL)
 # recode_GFR, conversion from L/min to mL/min
-huh3$v_PA = as.numeric(as.character(huh3$v_PA))
-huh3$v_GFR = as.numeric(as.character(huh3$v_GFR))
-huh3$v_GFR0 <- huh3$v_GFR*1000
+df$v_PA = as.numeric(as.character(df$v_PA))
+df$v_GFR = as.numeric(as.character(df$v_GFR))
+df$time = as.numeric(as.character(df$time))
+df$v_GFR0 <- df$v_GFR*1000
 #df$v_PA <- as.numeric(df$v_PA)
 #df$time <- as.factor(df$time)
 
 # save
-save(huh3, file = "doi_10.5061_dryad.h3s0r__v1/df.RData")
+save(df, file = "doi_10.5061_dryad.h3s0r__v1/df.RData")
 # load
 load("doi_10.5061_dryad.h3s0r__v1/df.RData")
 
