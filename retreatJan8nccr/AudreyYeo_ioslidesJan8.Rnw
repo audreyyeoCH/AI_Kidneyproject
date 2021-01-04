@@ -1,8 +1,12 @@
 \documentclass{beamer}
+\usetheme{Madrid}
+\usecolortheme{beaver}
 \begin{document}
 \title{Longitudinal cardiorenal data}
-\author{Audrey Yeo, Rn, M Nursing, MSci Biostatistics}
-\date{}
+\titlegraphic{\includegraphics[height=4.5cm, width = 6cm]{frontlogo.png}}
+\author{Audrey Yeo, RN}
+\date{15 January 2021}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
 <<include=FALSE,purl=FALSE>>=
@@ -10,6 +14,7 @@ library(knitr)
 opts_chunk$set(
 fig.path="figures/ch01_fig.jpg", fig.show="hold", 
 	cache=FALSE, fig.height=4)
+#\author[The author]{\includegraphics[height=1cm,width=2cm]{cat}\\The Author}
 
 @
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 
@@ -68,24 +73,24 @@ n = (2*(u+v)^2)/denom
   \end{itemize}
 \end{frame}
 
-\begin{frame}{Terminology}
-\footnotesize
-\centering
-\begin{itemize}
-\item CKD : Chronic Kidney Disease, clinical criteria of GFR (see below) of 90 L/min or below.
-\item GFR : Glomerular Filtration Rate L/min, measure of renal health and clinical criteria parameter for kidney disease
-\item MAP : arithmetic measure of systolic and diastolic blood pressure in mmHg, clinical parameter for cardiorenal function
-\item The Guyton model of fluid, electrolyte, and circulatory regulation is an extensive mathematical model of human circulatory physiology, capable of simulating a variety of experimental conditions, and contains a number of linked subsystems relating to circulation and its neuroendocrine control.
-\end{itemize}
-\end{frame}
+% \begin{frame}{Terminology}
+% \footnotesize
+% \centering
+% \begin{itemize}
+% \item CKD : Chronic Kidney Disease, clinical criteria of GFR (see below) of 90 L/min or below.
+% \item GFR : Glomerular Filtration Rate L/min, measure of renal health and clinical criteria parameter for kidney disease
+% \item MAP : arithmetic measure of systolic and diastolic blood pressure in mmHg, clinical parameter for cardiorenal function
+% \item The Guyton model of fluid, electrolyte, and circulatory regulation is an extensive mathematical model of human circulatory physiology, capable of simulating a variety of experimental conditions, and contains a number of linked subsystems relating to circulation and its neuroendocrine control.
+% \end{itemize}
+% \end{frame}
 
-\begin{frame}{Method}
+\begin{frame}{Virtual Population}
 \footnotesize
 \centering
 \begin{itemize}
-  \item Guyton's model of whole-body circulatory regulation model
-  \item A sample of individuals taken from a virtual population on the basis of exhibiting conditions similar to those of a real-world patient
-  \item Guyton model for in silico exploration of pathophysiological states and treatment strategies for purpose of sensitivity study
+  \item Moss et al (2012)'s virtual population of Guyton's model of whole-body circulatory regulation model was sampled
+  \item The virtual population was a sample of individuals taken from a virtual population on the basis of exhibiting conditions similar to those of a real-world patient
+  \item Guyton model was purposed for in silico exploration of pathophysiological states and treatment strategies for purpose of sensitivity study
   \item 96 parameters and 276 output variables 
   \item 32 cardiac, 21 renal, 16 autoregulation, 16 hormonal, 11 local circulation, and 4 thirst-related.
 \end{itemize}
@@ -96,8 +101,20 @@ n = (2*(u+v)^2)/denom
 \centering
 \begin{itemize}
   \item Time points are unequi-spaced
-	\item Four time points : 1h, 1d, 1w, 1 m
+	\item Four time points : 1 hour, 1 day, 1 week, 1 month
  	\end{itemize}
+\end{frame}
+
+\begin{frame}{Method}
+\footnotesize
+\centering
+\begin{itemize}
+  \item Between 2'000-3'000 patients had kidney failure (GFR $<$ 90 L/min) in each time point
+  \item I sampled all of the kidney failure cases and 2'500 patients without kidney failure at each time point.
+  \item I mapped the time trajectory of two variables; GFR and MAP
+  \item I clustered using supervised learning of the mean GFR across four time points
+  \item The model is ready for futher analysis  (e.g. mixed model regression)
+\end{itemize}
 \end{frame}
 
 \begin{frame}{Distribution of GFR with 90 L/min threshold}
@@ -133,7 +150,7 @@ ggplot(df) +
 \footnotesize
 \centering
 <<dfpa, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=4.5>>=
-ggplot(df[9000:20000,]) +
+ggplot(df) +
   geom_path(aes(y = v_GFR0, x = as.numeric(time), group = as.factor(id), colour = as.factor(id))) + 
   theme_gray() +
   theme(legend.position = "none") + labs(y = "GFR L/min", main = "", x= "time") 
@@ -144,9 +161,9 @@ ggplot(df[9000:20000,]) +
 \footnotesize
 \centering
 <<dfmap, results='asis', results='asis', warning=FALSE, message=FALSE, error=FALSE, echo=FALSE, eval = TRUE, fig.align= "centre",  fig.width=6, fig.height=4.5>>=
-ggplot(df[9000:20000,]) +
-  geom_path(aes(y = log(v_PA), x = as.numeric(time), group = as.factor(id), colour = as.factor(id))) + theme_gray() +
-  theme(legend.position = "none") + labs(y = "log MAP mmHG", main = "", x = "time") 
+ggplot(df) +
+  geom_path(aes(y = v_PA, x = as.numeric(time), group = as.factor(id), colour = as.factor(id))) + theme_gray() + scale_x_discrete(name = "time", limits = factor(c(1,2,3,4))) +
+  theme(legend.position = "none") + labs(y = "MAP mmHg", main = "", x = "time") 
 @
 \end{frame}
 
@@ -187,25 +204,33 @@ ggplot(df_longdf, aes(x = as.factor(time), y = v_GFR0.y, colour = kmlclusters4, 
 @
 \end{frame}
 
-\begin{frame}{Appendix : Pandemic population and CKD}
+\begin{frame}{Conclusions}
 \small
 \begin{itemize}
-  \item In the Swiss population study (2016), 1 in 10 adults are affected by CKD, 1 in 4 in the population above 60 years (Vogt, 2016)
-  \item The SARs-COV-2 virus has a known mechanism to the ACE inhibitor 2 receptor, which allows for membrane fusion, precedent events that lead to acute kidney injury. Prolonged ischemic acute tubular injury, toxic acute tubular injury or combination of both, acute interstitial nephritis, de novo glomerular disease, pre-renal azotemia, are basis for further evolution of kidney injury (Adapa et al 2020)
-  \item Increase development of acute and chronic kidney injury secondary to COVID admission in large observational study in Spain 2020. Also elevated Creatinine group have higher cumulative death rates.
+  \item Within group differences can be accounted for using clustering techniques, this would be modeled as random effects
+  \item Effects of other variables are fixed effects
+  \item Mixed model regression can be used to account for both
   \end{itemize}
 \end{frame}
+
+% \begin{frame}{Appendix : Pandemic population and CKD}
+% \small
+% \begin{itemize}
+%   \item In the Swiss population study (2016), 1 in 10 adults are affected by CKD, 1 in 4 in the population above 60 years (Vogt, 2016)
+%   \item The SARs-COV-2 virus has a known mechanism to the ACE inhibitor 2 receptor, which allows for membrane fusion, precedent events that lead to acute kidney injury. Prolonged ischemic acute tubular injury, toxic acute tubular injury or combination of both, acute interstitial nephritis, de novo glomerular disease, pre-renal azotemia, are basis for further evolution of kidney injury (Adapa et al 2020)
+%   \item Increase development of acute and chronic kidney injury secondary to COVID admission in large observational study in Spain 2020. Also elevated Creatinine group have higher cumulative death rates.
+%   \end{itemize}
+% \end{frame}
 
 \begin{frame}{References}
 \footnotesize
 \begin{itemize}
   \item Clemmer JS, Hester RL, Pruett WA. 2018 Simulating a virtual population’s sensitivity to salt and uninephrectomy. Interface Focus 8: 20160134. http://dx.doi.org/10.1098/rsfs.2016.0134
-  \item Moss R, Grosse T, Marchant I, Lassau N, Gueyffier F, et al. (2012) Virtual Patients and Sensitivity Analysis of the Guyton Model of Blood Pressure Regulation: Towards Individualized Models of Whole-Body Physiology. PLoS Comput Biol 8(6): e1002571. doi:10.1371/journal.pcbi.1002571
-  \item Kratzer, Pittavino, Lewis, Furrer, 2017 \texttt{abn}: An R Package for Modelling Multivariate Data Using Additive Bayesian Networks.
   \item Genolini, Alacoque, Sentenac, Arnaud, 2017 kml and kml3d: R Packages to Cluster Longitudinal Data \emph{kml and kml3d: R Packages to Cluster Longitudinal Data}
+    \item Moss R, Grosse T, Marchant I, Lassau N, Gueyffier F, et al. (2012) Virtual Patients and Sensitivity Analysis of the Guyton Model of Blood Pressure Regulation: Towards Individualized Models of Whole-Body Physiology. PLoS Comput Biol 8(6): e1002571. doi:10.1371/journal.pcbi.1002571
   \item Poteles et al (2020) Chronic kidney disease and acute kidney injury in the COVID-19 Spanish outbreak Nephrol Dial Transplant 35: 1353–1361 doi: 10.1093/ndt/gfaa189
   \item {https://models.physiomeproject.org/exposure/}
-  \item Chronic kidney disease in Swiss population (2016) Swiss Med Wkly. 2016;146:w14319
+  \item Vogt (2016) Chronic kidney disease in Swiss population, Swiss Med Wkly. 2016;146:w14319
 \end{itemize}
 %  \bibliographystyle{apalike}
 %\bibliography{biblio}
