@@ -7,10 +7,10 @@ library(kml)
 
 # load virt pop data
 # 384'000 rows x 412 variables, wide form, each row is an individual 
-load("doi_10.5061_dryad.h3s0r__v1/virtppl.1h.RData")
-load("doi_10.5061_dryad.h3s0r__v1/virtppl.1d.RData")
-load("doi_10.5061_dryad.h3s0r__v1/virtppl.1w.RData")
-load("doi_10.5061_dryad.h3s0r__v1/virtppl.1m.RData")
+# load("doi_10.5061_dryad.h3s0r__v1/virtppl.1h.RData")
+# load("doi_10.5061_dryad.h3s0r__v1/virtppl.1d.RData")
+# load("doi_10.5061_dryad.h3s0r__v1/virtppl.1w.RData")
+# load("doi_10.5061_dryad.h3s0r__v1/virtppl.1m.RData")
 #load("doi_10.5061_dryad.h3s0r__v1/virtppl.ee.RData") # elementary effects
 
 # subsetting data for only interested variables
@@ -58,6 +58,10 @@ save(virtppl.1dp, file = "virtppl.1dp.RData")
 save(virtppl.1wp, file = "virtppl.1wp.RData")
 save(virtppl.1mp, file = "virtppl.1mp.RData")
 
+load("virtppl.1hp.RData")
+load("virtppl.1dp.RData")
+load("virtppl.1wp.RData")
+load("virtppl.1mp.RData")
 
 # aggregate data
 # first by splitting into high and low
@@ -65,7 +69,7 @@ save(virtppl.1mp, file = "virtppl.1mp.RData")
 # "q" as postfix in data frame as this step proceeds p
 set.seed(1964) # Kamala Harris' Birthyear
 n = 2800
-sampleit = as.numeric(c(sample(1:nrow(virtppl.1h), n, replace = FALSE)))
+sampleit = as.numeric(c(sample(1:nrow(virtppl.1hp), n, replace = FALSE)))
 
 # ckd and non ckd population
 low_1h = virtppl.1hp[virtppl.1hp$group == "low",]
@@ -95,10 +99,16 @@ high_1d = high_1d0[high_1d0$id %in% sampleit,]
 high_1w = high_1w0[high_1w0$id %in% sampleit,]
 high_1m = high_1m0[high_1m0$id %in% sampleit,]
 
-save(high_1h, file = "doi_10.5061_dryad.h3s0r__v1/high_1h.RData")
-save(high_1d, file = "doi_10.5061_dryad.h3s0r__v1/high_1d.RData")
-save(high_1w, file = "doi_10.5061_dryad.h3s0r__v1/high_1w.RData")
-save(high_1m, file = "doi_10.5061_dryad.h3s0r__v1/high_1m.RData")
+# save(high_1h, file = "doi_10.5061_dryad.h3s0r__v1/high_1h.RData")
+# save(high_1d, file = "doi_10.5061_dryad.h3s0r__v1/high_1d.RData")
+# save(high_1w, file = "doi_10.5061_dryad.h3s0r__v1/high_1w.RData")
+# save(high_1m, file = "doi_10.5061_dryad.h3s0r__v1/high_1m.RData")
+
+load("doi_10.5061_dryad.h3s0r__v1/high_1h.RData")
+load("doi_10.5061_dryad.h3s0r__v1/high_1d.RData")
+load("doi_10.5061_dryad.h3s0r__v1/high_1w.RData")
+load("doi_10.5061_dryad.h3s0r__v1/high_1m.RData")
+
 
 # create all time frame wide form data
 
@@ -114,11 +124,18 @@ df = data.frame(rbind(as.matrix(ttt), as.matrix(ttu)))
 # 1h data
 idstoremove <- unique(df[df$group == "low",]$id)
 length(idstoremove)  #3600
-sum(idstoremove %in% df[df$group == "norm",]$id ) # 11
-cc = which(df[df$group == "norm",]$id %in% idstoremove) # 11
-#which(idstoremove %in% df[df$group == "norm",]$id )
-#df[df$group == "norm",] %>% 
-#  filter(!id %in% cc) -> df # this doesn't work
+sum(idstoremove %in% df[df$group == "norm",]$id ) # 13
+cc = which(df[df$group == "norm",]$id %in% idstoremove) # 13
+which(idstoremove %in% df[df$group == "norm",]$id )
+# [1]   79  203  549  603 1164 1786 1827 2254 2550
+# [10] 2586 2699 3289 3554
+
+dim(df)# 22'246 x 9
+
+df[df$group == "norm",] %>% 
+  filter(!id %in% cc) -> df0 # this doesn't work
+
+dim(df0) #11'009 x 9 This is troubling
 
 df$v_PA = as.numeric(as.character(df$v_PA))
 df$v_GFR = as.numeric(as.character(df$v_GFR))
@@ -126,11 +143,12 @@ df$time = as.numeric(as.character(df$time))
 df$v_GFR0 <- df$v_GFR*1000
 #df$v_PA <- as.numeric(df$v_PA)
 #df$time <- as.factor(df$time)
-save(df, file = "doi_10.5061_dryad.h3s0r__v1/df.RData")
+#save(df, file = "doi_10.5061_dryad.h3s0r__v1/df.RData")
 
+load("doi_10.5061_dryad.h3s0r__v1/df.RData")
 #EDA
-summary(df$v_PA)
-summary(df$v_GFR0)
+summary(df$v_PA) # fine
+summary(df$v_GFR0) # fine
 
 ggplot(df) +
   geom_histogram(alpha = 0.6, binwidth= 2, aes(x = v_PA)) +
