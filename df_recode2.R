@@ -77,8 +77,13 @@ else {
   heytable$troup = "lo group"
  }
 
+# sequence along
+for (i in 1:nrow(heytable))
+
 # if condition
-heytable[heytable[id[i]]$time == 1,]$v_GFR0 > heytable[heytable[id[i]]$time == 1,]$v_GFRO
+heytable[heytable[id[i]]$time == 1,]$v_GFR0 > heytable[heytable[id[i]]$time == 2,]$v_GFRO
+
+# the else
 heytable[heytable$id[i],]$troup = "hi group"
 
 
