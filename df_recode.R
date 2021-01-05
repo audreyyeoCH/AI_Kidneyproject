@@ -119,7 +119,11 @@ tts = rbind(low_1m, high_1m)
 
 ttt = data.frame(rbind(as.matrix(ttp), as.matrix(ttq)))
 ttu = data.frame(rbind(as.matrix(ttr), as.matrix(tts)))
+df0 = data.frame(rbind(as.matrix(ttt), as.matrix(ttu)))
+#save(df0, file = "doi_10.5061_dryad.h3s0r__v1/df0.RData") 
 df = data.frame(rbind(as.matrix(ttt), as.matrix(ttu)))
+
+
 
 # 1h data
 idstoremove <- unique(df[df$group == "low",]$id)
@@ -133,9 +137,9 @@ which(idstoremove %in% df[df$group == "norm",]$id )
 dim(df)# 22'246 x 9
 
 df[df$group == "norm",] %>% 
-  filter(!id %in% cc) -> df0 # this doesn't work
+  filter(!id %in% cc) -> df1 # this doesn't work
 
-dim(df0) #11'009 x 9 This is troubling
+dim(df1) #11'009 x 9 This is troubling
 
 df$v_PA = as.numeric(as.character(df$v_PA))
 df$v_GFR = as.numeric(as.character(df$v_GFR))
@@ -156,7 +160,7 @@ ggplot(df) +
              linetype="dashed", size=1)
 
 ggplot(df) +
-  geom_histogram(alpha=0.6, binwidth = 20, 
+  geom_histogram(alpha=0.6, binwidth = 10, 
                  aes(x = v_GFR0, colour = v_GFR0)) +
   geom_vline(aes(xintercept= 90), color="pink", 
              linetype="dashed", size=1)
@@ -167,8 +171,8 @@ ggplot(df) +
   theme(legend.position = "none") + labs(y = "MAP mmHG") 
 
 ggplot(df) + # shows missing values
-  geom_path(aes(y = log(v_GFR0), x = time, group = , colour = as.factor(id))) +
-  theme(legend.position = "none") + labs(y = "log GFR L/min") 
+  geom_path(aes(y = v_GFR0, x = time, group = , colour = as.factor(id))) +
+  theme(legend.position = "none") + labs(y = "GFR L/min") 
 
 ggplot(df) +
   geom_path(aes(y = v_GFR0, x = time, group = , colour = as.factor(id))) +
