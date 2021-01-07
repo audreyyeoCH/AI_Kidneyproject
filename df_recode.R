@@ -1,10 +1,16 @@
+# Contributions by Audrey Yeo and Dr. Diane de Zélicourt
+#==================
 # load libraries
+#==================
 library(tidyverse)
 library(viridis)
 library(ggmosaic)
 library(janitor)
 library(kml)
 
+#================================================
+# preprocessing - to be done only once
+#================================================
 # load virt pop data
 # 384'000 rows x 412 variables, wide form, each row is an individual 
 # load("doi_10.5061_dryad.h3s0r__v1/virtppl.1h.RData")
@@ -14,64 +20,75 @@ library(kml)
 #load("doi_10.5061_dryad.h3s0r__v1/virtppl.ee.RData") # elementary effects
 
 # subsetting data for only interested variables
-inv = c("v_GFR","v_CNA", "v_CKE", "v_HM", "v_PA", "v_HR")
-# virtppl.1h$v_CNA
+# inv = c("v_GFR","v_CNA", "v_CKE", "v_HM", "v_PA", "v_HR")
+# virtppl.1h$v_CNA # extracellular odium mEq/L
 # virtppl.1h$v_CKE # extracellular potassium concentrate
-# virtppl.1h$v_HM
+# virtppl.1h$v_HM # haematocrit
 # virtppl.1h$v_PA #map
 # virtppl.1h$v_HR #heart rate
-virtppl.1hp = virtppl.1h[,inv]
-virtppl.1dp = virtppl.1d[,inv]
-virtppl.1wp = virtppl.1w[,inv]
-virtppl.1mp = virtppl.1m[,inv]
+# virtppl.1hp = virtppl.1h[,inv]
+# virtppl.1dp = virtppl.1d[,inv]
+# virtppl.1wp = virtppl.1w[,inv]
+# virtppl.1mp = virtppl.1m[,inv]
 
+# how many low GFRs are there per time point ?
 # all stars of "folklore" by taylor swift
-betty = length(virtppl.1h$v_GFR[virtppl.1h$v_GFR <= 90/1000]) # 2834
-# in the 384'000 observations, there are 2'834 observations with GFR below 90mL/min
-ines = length(virtppl.1d$v_GFR[virtppl.1d$v_GFR <= 90/1000]) # 2771
-james = length(virtppl.1w$v_GFR[virtppl.1w$v_GFR <= 90/1000]) # 2765
-august = length(virtppl.1m$v_GFR[virtppl.1m$v_GFR <= 90/1000]) #2781
+#betty = length(virtppl.1h$v_GFR[virtppl.1h$v_GFR <= 90/1000]) # 2834
+#ines = length(virtppl.1d$v_GFR[virtppl.1d$v_GFR <= 90/1000]) # 2771
+#james = length(virtppl.1w$v_GFR[virtppl.1w$v_GFR <= 90/1000]) # 2765
+#august = length(virtppl.1m$v_GFR[virtppl.1m$v_GFR <= 90/1000]) #2781
 
 # assign ID
-virtppl.1hp$id = c(seq(1,nrow(virtppl.1h),1))
-virtppl.1dp$id = c(seq(1,nrow(virtppl.1h),1))
-virtppl.1wp$id = c(seq(1,nrow(virtppl.1h),1))
-virtppl.1mp$id = c(seq(1,nrow(virtppl.1h),1))
+# virtppl.1hp$id = c(seq(1,nrow(virtppl.1h),1))
+# virtppl.1dp$id = c(seq(1,nrow(virtppl.1h),1))
+# virtppl.1wp$id = c(seq(1,nrow(virtppl.1h),1))
+# virtppl.1mp$id = c(seq(1,nrow(virtppl.1h),1))
 #check
-summary(virtppl.1dp$id)
+#summary(virtppl.1dp$id)
 
 # assign Time var
-virtppl.1hp$time = data.frame(rep("1", nrow(virtppl.1hp)))
-virtppl.1dp$time = data.frame(rep("2", nrow(virtppl.1dp)))
-virtppl.1wp$time = data.frame(rep("3", nrow(virtppl.1wp)))
-virtppl.1mp$time = data.frame(rep("4", nrow(virtppl.1mp)))
+# virtppl.1hp$time = data.frame(rep("1", nrow(virtppl.1hp)))
+# virtppl.1dp$time = data.frame(rep("2", nrow(virtppl.1dp)))
+# virtppl.1wp$time = data.frame(rep("3", nrow(virtppl.1wp)))
+# virtppl.1mp$time = data.frame(rep("4", nrow(virtppl.1mp)))
 
 
-# binarising low and norm GFR
+# binarising low and norm GFR #DDZ
 virtppl.1hp$group = ifelse(virtppl.1hp$v_GFR < 0.09, "low", "norm")
 virtppl.1dp$group = ifelse(virtppl.1dp$v_GFR < 0.09, "low", "norm")
 virtppl.1wp$group = ifelse(virtppl.1dp$v_GFR < 0.09, "low", "norm")
 virtppl.1mp$group = ifelse(virtppl.1dp$v_GFR < 0.09, "low", "norm")
 
-save(virtppl.1hp, file = "virtppl.1hp.RData") # p for preparation
-save(virtppl.1dp, file = "virtppl.1dp.RData")
-save(virtppl.1wp, file = "virtppl.1wp.RData")
-save(virtppl.1mp, file = "virtppl.1mp.RData")
+# global label #DDZ
+#   - if it is low at least once (i.e. sum of isLow>=1), then global label is isLowGlobal>=1
+#   - if it is never low (i.e. sum of isLow=0), then global label is isLowGlobal=0
+virtppl.1hp$isLowGlobal = virtppl.1hp$isLow+virtppl.1dp$isLow+virtppl.1wp$isLow+virtppl.1mp$isLow
+virtppl.1wp$isLowGlobal = virtppl.1hp$isLow+virtppl.1dp$isLow+virtppl.1wp$isLow+virtppl.1mp$isLow
+virtppl.1dp$isLowGlobal = virtppl.1hp$isLow+virtppl.1dp$isLow+virtppl.1wp$isLow+virtppl.1mp$isLow
+virtppl.1mp$isLowGlobal = virtppl.1hp$isLow+virtppl.1dp$isLow+virtppl.1wp$isLow+virtppl.1mp$isLow
 
+virtppl.1hp$group = ifelse(virtppl.1hp$isLowGlobal >0, "low", "norm") ##AY is this the other way
+virtppl.1dp$group = ifelse(virtppl.1dp$isLowGlobal >0, "low", "norm")
+virtppl.1wp$group = ifelse(virtppl.1wp$isLowGlobal >0, "low", "norm")
+virtppl.1mp$group = ifelse(virtppl.1mp$isLowGlobal >0, "low", "norm")
+
+# save(virtppl.1hp, file = "virtppl.1hp.RData") # p for preparation
+# save(virtppl.1dp, file = "virtppl.1dp.RData")
+# save(virtppl.1wp, file = "virtppl.1wp.RData")
+# save(virtppl.1mp, file = "virtppl.1mp.RData")
+
+#==================================================
+# PREPROCESSING STEP 2 for creating long form data frame of all time points
+# Note that labeling operation done above can be redone here if needed
+#==================================================
 load("virtppl.1hp.RData")
 load("virtppl.1dp.RData")
 load("virtppl.1wp.RData")
 load("virtppl.1mp.RData")
 
-# aggregate data
-# first by splitting into high and low
-# then sampling n out of data frame 
+# aggregate data first by splitting into high and low
+# then sampling n out of data frame  (below)
 # "q" as postfix in data frame as this step proceeds p
-set.seed(1964) # Kamala Harris' Birthyear
-n = 2800
-sampleit = as.numeric(c(sample(1:nrow(virtppl.1hp), n, replace = FALSE)))
-
-# ckd and non ckd population
 low_1h = virtppl.1hp[virtppl.1hp$group == "low",]
 low_1d = virtppl.1dp[virtppl.1dp$group == "low",]
 low_1w = virtppl.1wp[virtppl.1wp$group == "low",]
@@ -82,27 +99,41 @@ high_1d0 = virtppl.1dp[virtppl.1dp$group == "norm",]
 high_1w0 = virtppl.1wp[virtppl.1wp$group == "norm",]
 high_1m0 = virtppl.1mp[virtppl.1mp$group == "norm",]
 
-# saving
-save(low_1h, file = "doi_10.5061_dryad.h3s0r__v1/low_1h.RData")
-save(low_1d, file = "doi_10.5061_dryad.h3s0r__v1/low_1d.RData")
-save(low_1w, file = "doi_10.5061_dryad.h3s0r__v1/low_1w.RData")
-save(low_1m, file = "doi_10.5061_dryad.h3s0r__v1/low_1m.RData")
-# save
-save(high_1h0, file = "doi_10.5061_dryad.h3s0r__v1/high_1h0.RData")
-save(high_1d0, file = "doi_10.5061_dryad.h3s0r__v1/high_1d0.RData")
-save(high_1w0, file = "doi_10.5061_dryad.h3s0r__v1/high_1w0.RData")
-save(high_1m0, file = "doi_10.5061_dryad.h3s0r__v1/high_1m0.RData")
-
+# sample only out of norm group, as only low counts seen in low group
+# then sampling n out of data frame (as mentioned above)
+set.seed(1964) # Kamala Harris' Birthyear
+n = 2800
+sampleit = as.numeric(c(sample(1:nrow(virtppl.1hp), n, replace = FALSE)))
 # sample only out of norm group, as only low counts seen in low group
 high_1h = high_1h0[high_1h0$id %in% sampleit,]
 high_1d = high_1d0[high_1d0$id %in% sampleit,]
 high_1w = high_1w0[high_1w0$id %in% sampleit,]
 high_1m = high_1m0[high_1m0$id %in% sampleit,]
 
+# saving
+# save(low_1h, file = "doi_10.5061_dryad.h3s0r__v1/low_1h.RData")
+# save(low_1d, file = "doi_10.5061_dryad.h3s0r__v1/low_1d.RData")
+# save(low_1w, file = "doi_10.5061_dryad.h3s0r__v1/low_1w.RData")
+# save(low_1m, file = "doi_10.5061_dryad.h3s0r__v1/low_1m.RData")
+# save
+# save(high_1h0, file = "doi_10.5061_dryad.h3s0r__v1/high_1h0.RData")
+# save(high_1d0, file = "doi_10.5061_dryad.h3s0r__v1/high_1d0.RData")
+# save(high_1w0, file = "doi_10.5061_dryad.h3s0r__v1/high_1w0.RData")
+# save(high_1m0, file = "doi_10.5061_dryad.h3s0r__v1/high_1m0.RData")
+
 # save(high_1h, file = "doi_10.5061_dryad.h3s0r__v1/high_1h.RData")
 # save(high_1d, file = "doi_10.5061_dryad.h3s0r__v1/high_1d.RData")
 # save(high_1w, file = "doi_10.5061_dryad.h3s0r__v1/high_1w.RData")
 # save(high_1m, file = "doi_10.5061_dryad.h3s0r__v1/high_1m.RData")
+
+#==================================================
+# PREPROCESSING STEP 3
+# Note that labeling operation done above can be redone here if needed
+#==================================================
+load("doi_10.5061_dryad.h3s0r__v1/low_1h.RData")
+load("doi_10.5061_dryad.h3s0r__v1/low_1d.RData")
+load("doi_10.5061_dryad.h3s0r__v1/low_1w.RData")
+load("doi_10.5061_dryad.h3s0r__v1/low_1m.RData")
 
 load("doi_10.5061_dryad.h3s0r__v1/high_1h.RData")
 load("doi_10.5061_dryad.h3s0r__v1/high_1d.RData")
@@ -111,7 +142,6 @@ load("doi_10.5061_dryad.h3s0r__v1/high_1m.RData")
 
 
 # create all time frame wide form data
-
 ttp = rbind(low_1h, high_1h)
 ttq = rbind(low_1d, high_1d)
 ttr = rbind(low_1w, high_1w)
@@ -124,23 +154,6 @@ df0 = data.frame(rbind(as.matrix(ttt), as.matrix(ttu)))
 df = data.frame(rbind(as.matrix(ttt), as.matrix(ttu)))
 
 
-
-# 1h data
-idstoremove <- unique(df[df$group == "low",]$id)
-length(idstoremove)  #3600
-sum(idstoremove %in% df[df$group == "norm",]$id ) # 13
-cc = which(df[df$group == "norm",]$id %in% idstoremove) # 13
-which(idstoremove %in% df[df$group == "norm",]$id )
-# [1]   79  203  549  603 1164 1786 1827 2254 2550
-# [10] 2586 2699 3289 3554
-
-dim(df)# 22'246 x 9
-
-df[df$group == "norm",] %>% 
-  filter(!id %in% cc) -> df1 # this doesn't work
-
-dim(df1) #11'009 x 9 This is troubling
-
 df$v_PA = as.numeric(as.character(df$v_PA))
 df$v_GFR = as.numeric(as.character(df$v_GFR))
 df$time = as.numeric(as.character(df$time))
@@ -150,6 +163,19 @@ df$v_GFR0 <- df$v_GFR*1000
 #save(df, file = "doi_10.5061_dryad.h3s0r__v1/df.RData")
 
 load("doi_10.5061_dryad.h3s0r__v1/df.RData")
+
+norm <- df[df$group == "norm",]
+low <- df[df$group == "low",]
+
+## plots by groups
+ggplot(low) + 
+  geom_path(aes(y = v_GFR0, x = time, group = , colour = as.factor(id))) +
+  theme(legend.position = "none") + labs(y = "Low, GFR L/min", x = "Time (hours)") 
+ggplot(norm) + 
+  geom_path(aes(y = v_GFR0, x = time, group = , colour = as.factor(id))) +
+  theme(legend.position = "none") + labs(y = "Norm, GFR L/min", x = "Time (hours)") 
+
+
 #EDA
 summary(df$v_PA) # fine
 summary(df$v_GFR0) # fine
@@ -190,21 +216,9 @@ ggplot(df) +
 #   geom_path(aes(y = log(df$v_GFR), x = time, group = , colour = as.factor(id))) +
 #   theme(legend.position = "none") 
   
-# kml clustering
-
-
-
-# datafame = data.frame(rbind(virtppl.1h0, virtppl.1d0, virtppl.1w0, virtppl.1m0))
-# out = NA
-# for (i in 1:4) { datafame[i]$id = data.frame(c(1:nrow(virtppl.1d))) }
-#   #datafame = c(datafame$id, datafame)
-# for (i in 1:4) {
-#   assign(paste0("df", sep = "", i), 
-#          as.data.frame(datafame[i]))
-# }
-
-
-
+#==================================================
+# KLM CLUSTERING
+#==================================================  
 ######## Cld object needed for kml #####
 shortdf <- df[, c(7, 8, 10)]
 str(shortdf)
@@ -430,10 +444,6 @@ length(df$v_GFR0[df$v_GFR0 < 90])
 class(df$p_CV)
 class(df$time)
 names(df)
-
-
-
-
 
 
 
