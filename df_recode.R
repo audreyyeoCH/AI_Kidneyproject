@@ -176,27 +176,30 @@ ggplot(norm) +
   theme(legend.position = "none") + labs(y = "Norm, GFR L/min", x = "Time (hours)") 
 
 
-#EDA
+#EDA (check)
 summary(df$v_PA) # fine
 summary(df$v_GFR0) # fine
 
 ggplot(df) +
   geom_histogram(alpha = 0.6, binwidth= 2, aes(x = v_PA)) +
   geom_vline(aes(xintercept= 106.6), color="pink", 
-             linetype="dashed", size=1)
+             linetype="dashed", size=1) +
+  labs(x = "MAP mmHg")
+  
 
 ggplot(df) +
   geom_histogram(alpha=0.6, binwidth = 10, 
                  aes(x = v_GFR0, colour = v_GFR0)) +
   geom_vline(aes(xintercept= 90), color="pink", 
-             linetype="dashed", size=1)
+             linetype="dashed", size=1) +
+  labs(x = "GFR L/min")
 
 # first longitudinal plot
 ggplot(df) +
   geom_path(aes(y = v_PA, x = time, group = , colour = as.factor(id))) +
   theme(legend.position = "none") + labs(y = "MAP mmHG") 
 
-ggplot(df) + # shows missing values
+ggplot(df) + 
   geom_path(aes(y = v_GFR0, x = time, group = , colour = as.factor(id))) +
   theme(legend.position = "none") + labs(y = "GFR L/min") 
 
@@ -220,9 +223,9 @@ ggplot(df) +
 # KLM CLUSTERING
 #==================================================  
 ######## Cld object needed for kml #####
-shortdf <- df[, c(7, 8, 10)]
+shortdf <- df[, c(7, 8, 12)]
 str(shortdf)
-spread(shortdf, id, time, v_GFR0) -> widedf0
+spread(shortdf, time, v_GFR0) -> widedf0
 head(widedf0)
 sum(is.na(widedf0)) 
 #class(widedf0)
@@ -296,7 +299,7 @@ df_longdf <- full_join(df, testlong, by =
 class(testlong$time) # numeric
 class(df$time) # numeric
 
-View(df_longdf[1:10,415:416])
+View(df_longdf[1:10,1:4])
 #colnames(df_longdf)[415] -> "v_GRF0"
 save(df_longdf, file = "df_longdf.Rda")
 
@@ -307,8 +310,8 @@ save(df_longdf, file = "df_longdf.Rda")
 #df$p_NID
 
 
-
-df_longA = df_longdf[kmlclusters == "A"]
+load("df_longdf.Rda")
+df_longA = df_longdf[df_longdf$kmlclusters == "A"]
 
 ggplot(df_longdf) +
   geom_mosaic(aes(x = product(kmlclusters2, kmlclusters4),
@@ -331,19 +334,20 @@ ggplot(df_longdf, aes(x = time, y = v_GFR0.y, colour = kmlclusters2, group = kml
         axis.text.x.bottom = element_text(size = 8)) + 
         expand_limits(y=c(110, 120)) 
 
-ggplot(df_longdf, aes(x = time, y = v_GFR0.y, colour = kmlclusters4, group = kmlclusters4)) +
+ggplot(df_longdf, aes(x = as.factor(time), y = v_GFR0.y, colour = kmlclusters4, group = kmlclusters4)) +
   geom_smooth(method = "loess", se = TRUE) +
   theme_gray()+
-  labs(y = "GFR mL/min", x = "time") +
+  labs(y = "GFR mL/min", x = "time", title = "Clusteing into 4 partitians") +
   #geom_vline(xintercept = c(6, ), colour = "red", linetype = "dotted") +
   theme(legend.position = "bottom",
-        legend.title = element_text(size = 8),
-        legend.text = element_text(size = 8),
-        axis.title = element_text(size = 8),
-        axis.text.x.bottom = element_text(size = 8)) 
+        legend.title = element_text(size = 10),
+        legend.text = element_text(size = 10),
+        axis.title = element_text(size = 10),
+        axis.text.x.bottom = element_text(size = 10)) +
+  scale_colour_discrete(name = "Four kml\npartitians (n)")
 
 # v_PA
-ggplot(df_longdf, aes(x = time, y = v_PA, colour = kmlclusters2, group = kmlclusters2)) +
+ggplot(df_longdf, aes(as.factor(time), y = v_PA, colour = kmlclusters2, group = kmlclusters2)) +
   geom_smooth(method = "loess", se = FALSE) +
   theme_gray()+
   labs(y = "mmHg", x = "time") +
@@ -370,6 +374,55 @@ ggplot(df_longdf, aes(x = time, y = v_PA, colour = kmlclusters4, group = kmlclus
  # expand_limits(y=c(110, 117)) 
 
 
+###
+ggplot(df_longdf) + 
+  geom_path(aes(y = v_GFR0.y, x = as.factor(time), group = id, colour =  v_GFR0.y)) +
+  theme(legend.position = "none") + labs(y = "GFR L/min", x = "time", title = "Clustering into 4 partitians") +
+  scale_color_gradientn(colours = c("firebrick", "orange", "navyblue"),
+                        values = c(0, 0.5, 1),limits = c(50, 120), oob = scales::squish) +
+  theme(legend.position = "none",
+        plot.title = element_text(size = 12),
+        axis.title = element_text(size = 10))
+
+
+#Zooming in per cluster
+
+
+df_long4A = df_longdf[df_longdf$kmlclusters4 == "A",]
+df_long4B = df_longdf[df_longdf$kmlclusters4 == "B",]
+df_long4C = df_longdf[df_longdf$kmlclusters4 == "C",]
+df_long4D = df_longdf[df_longdf$kmlclusters4 == "D",]
+
+ggplot(df_long4A) + 
+  geom_path(aes(y = v_GFR0.y, x = time, group = id, color = v_GFR0.y), size=0.5, show.legend=FALSE) +
+  theme_bw() + labs(y = "GFR L/min", x = "time",title="Partition A")+ ylim(0, 175) + 
+  scale_color_gradientn(colours = c("firebrick", "orange", "navyblue"),
+                        values = c(0, 0.5, 1),limits = c(50, 120), oob = scales::squish) +
+  theme(legend.position = "none",
+        plot.title = element_text(size = 12),
+        axis.title = element_text(size = 10))
+
+ggplot(df_long4B) + 
+  geom_path(aes(y = v_GFR0.y, x = time, group = id, color = v_GFR0.y), size=0.5, show.legend=FALSE) +
+  theme_bw() + labs(y = "GFR L/min", x = "time",title="Partition B")+ ylim(0, 175) + 
+  scale_color_gradientn(colours = c("firebrick", "orange", "navyblue"),
+                        values = c(0, 0.5, 1),limits = c(50, 120), oob = scales::squish) +
+  theme(legend.position = "none",
+        plot.title = element_text(size = 12),
+        axis.title = element_text(size = 10))
+
+ggplot(df_long4C) + 
+  geom_path(aes(y = v_GFR0.y, x = time, group = id, color = v_GFR0.y), size=0.5, show.legend=FALSE) +
+  theme_bw() + labs(y = "GFR L/min", x = "time",title="Partition C")+ ylim(0, 175) + 
+  scale_color_gradientn(colours = c("firebrick", "orange", "navyblue"),
+                        values = c(0, 0.5, 1),limits = c(50, 120), oob = scales::squish)
+
+ggplot(df_long4D) + 
+  geom_path(aes(y = v_GFR0.y, x = time, group = id, color = v_GFR0.y), size=0.5, show.legend=FALSE) +
+  theme_bw() + labs(y = "GFR L/min", x = "time",title="Partition D")+ ylim(0, 175) + 
+  scale_color_gradientn(colours = c("firebrick", "orange", "navyblue"),
+                        values = c(0, 0.5, 1),limits = c(50, 120), oob = scales::squish)
+#######
 
 df_longdf %>% 
   tabyl(kmlclusters2, time) -> kml2tab
@@ -394,13 +447,17 @@ ggplot(df) +
   geom_histogram(alpha=0.6, binwidth = 2, aes(x = v_PA, colour = v_PA)) +
   geom_density(aes(x = v_PA), alpha=.2, fill="#FF6666") +
   theme(legend.position = "none") +
+  labs(x = "MAP mmHg")
   scale_colour_viridis(discrete = TRUE) +
   scale_fill_viridis(discrete = TRUE) +
   geom_vline(aes(xintercept=mean(df$v_PA)),
              color="pink", linetype="dashed", size=1) +
   scale_fill_brewer(palette = "Dark2") +
   scale_color_brewer(palette = "Dark2") +
-  theme_gray()
+  theme_gray() +
+  theme(legend.position = "",
+        plot.title = element_text(size = 12),
+        axis.title = element_text(size = 10))
 
 # v_GFR
 summary(df_longdf$v_GFR0)
@@ -414,7 +471,11 @@ ggplot(df_longdf) +
              color="pink", linetype="dashed", size=1) +
   scale_fill_brewer(palette = "Dark2") +
   scale_color_brewer(palette = "Dark2") +
-  theme_gray()
+  theme_gray() +
+  labs(x = "GFR L/min") +
+  theme(legend.position = "",
+        plot.title = element_text(size = 12),
+        axis.title = element_text(size = 10))
 
 ggplot(df_longdf) +
   geom_histogram(aes(x = v_GFR0.y), binwidth = 5)
